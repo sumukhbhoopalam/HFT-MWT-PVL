@@ -7,7 +7,7 @@ def get_shopping_items(db: Session, skip: int = 0, limit: int = 10):
 
 # Create a new shopping item
 def create_shopping_item(db: Session, shopping_item: schemas.ShoppingItemCreate):
-    db_item = models.ShoppingItem(name=shopping_item.name, number=shopping_item.number)
+    db_item = models.ShoppingItem(name=shopping_item.name, amount=shopping_item.amount)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
@@ -21,7 +21,7 @@ def get_shopping_item_by_name(db: Session, name: str):
 def update_shopping_item_by_name(db: Session, name: str, shopping_item: schemas.ShoppingItemCreate):
     db_item = db.query(models.ShoppingItem).filter(models.ShoppingItem.name == name).first()
     if db_item:
-        db_item.number = shopping_item.number
+        db_item.amount = shopping_item.amount
         db.commit()
         db.refresh(db_item)
         return db_item

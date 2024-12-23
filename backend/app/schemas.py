@@ -3,7 +3,7 @@ from pydantic import BaseModel
 # Base schema for item
 class ShoppingItemBase(BaseModel):
     name: str
-    number: int
+    amount: int
 
 # Schema for creating a new item
 class ShoppingItemCreate(ShoppingItemBase):
