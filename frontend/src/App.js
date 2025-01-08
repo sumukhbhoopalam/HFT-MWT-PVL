@@ -9,13 +9,12 @@ const App = () => {
   const [newItem, setNewItem] = useState({ name: "", amount: "" });
   const [editItem, setEditItem] = useState(null);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
-
-  const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
+  const [config, setConfig] = useState(null);
 
   // Fetch shopping items from the backend
-  const fetchItems = async () => {
+  const fetchItems = async (apiUrl) => {
     try {
-      const response = await fetch(`${API_BASE_URL}`);
+      const response = await fetch(`${apiUrl}`);
       const data = await response.json();
       setItems(data);
     } catch (error) {
@@ -24,22 +23,34 @@ const App = () => {
   };
 
   useEffect(() => {
-    fetchItems();
+    // Load config.json
+    fetch("/config.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to load config.json");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setConfig(data);
+        fetchItems(data.REACT_APP_BACKEND_URL);
+      })
+      .catch((error) => console.error("Error loading config:", error));
   }, []);
 
   // Add a new item
   const addItem = async () => {
-    if (!newItem.name || !newItem.amount) return;
+    if (!newItem.name || !newItem.amount || !config) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}`, {
+      const response = await fetch(`${config.REACT_APP_BACKEND_URL}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newItem),
       });
 
       if (response.ok) {
-        fetchItems();
+        fetchItems(config.REACT_APP_BACKEND_URL);
         setNewItem({ name: "", amount: "" });
       }
     } catch (error) {
@@ -49,11 +60,11 @@ const App = () => {
 
   // Update an existing item
   const updateItem = async () => {
-    if (!editItem) return;
+    if (!editItem || !config) return;
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/${editItem.name}`,
+        `${config.REACT_APP_BACKEND_URL}/${editItem.name}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -62,7 +73,7 @@ const App = () => {
       );
 
       if (response.ok) {
-        fetchItems();
+        fetchItems(config.REACT_APP_BACKEND_URL);
         setEditModalOpen(false);
       }
     } catch (error) {
@@ -72,18 +83,31 @@ const App = () => {
 
   // Delete an item
   const deleteItem = async (itemName) => {
+    if (!config) return;
+
     try {
-      const response = await fetch(`${API_BASE_URL}/${itemName}`, {
+      const response = await fetch(`${config.REACT_APP_BACKEND_URL}/${itemName}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
-        fetchItems();
+        fetchItems(config.REACT_APP_BACKEND_URL);
       }
     } catch (error) {
       console.error("Error deleting item:", error);
     }
   };
+
+  if (!config) {
+    // Render a loading indicator or placeholder until config is loaded
+    return (
+      <Container>
+        <Typography variant="h6" gutterBottom>
+          Loading configuration...
+        </Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container>

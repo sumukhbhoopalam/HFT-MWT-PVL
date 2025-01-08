@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as a parent image
-FROM node:16
+FROM node:16 as build
 
 # Set the working directory
 WORKDIR /app
@@ -11,19 +11,28 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-#Set env
-ARG REACT_APP_BACKEND_URL
-ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
-
 # Build the React app for production
 RUN npm run build
 
 # Use a lightweight web server to serve static files
 FROM nginx:alpine
-COPY --from=0 /app/build /usr/share/nginx/html
+
+# Set working directory for nginx
+WORKDIR /usr/share/nginx/html
+
+# Copy the build output to Nginx's HTML directory
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Copy a default config.json (optional, for fallback in production)
+COPY config.json ./config.json
+
+# Add entrypoint script to allow dynamic config.json setup
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Expose the port Nginx is running on
 EXPOSE 80
 
-# Start Nginx
+# Start the entrypoint script and Nginx
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
