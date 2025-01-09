@@ -10,9 +10,10 @@ services:
     ports:
       - "3000:80"
     environment:
-      REACT_APP_BACKEND_URL: "http://backend/api/shoppingItems"
+      REACT_APP_BACKEND_URL: "http://localhost:8000/api/shoppingItems"
     depends_on:
       - backend
+      - backenddotnet
     networks:
       - app-network
 
@@ -23,6 +24,21 @@ services:
       - "8000:80"
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/mydatabase
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  backenddotnet:
+    build:
+      context: ./backend-dotnet
+      dockerfile: Dockerfile
+    image: sumukhbhoopalam/backenddotnet:latest
+    container_name: backenddotnet
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - db
     networks:
