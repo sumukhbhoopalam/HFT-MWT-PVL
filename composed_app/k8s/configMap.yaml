@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: app-namespace
+data:
+  REACT_APP_BACKEND_URL: "http://backend/api/shoppingItems"
+  DATABASE_URL: "postgresql://user:password@db:5432/mydatabase"

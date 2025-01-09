@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backenddotnet
+  namespace: app-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backenddotnet
+  template:
+    metadata:
+      labels:
+        app: backenddotnet
+    spec:
+      containers:
+        - name: backenddotnet
+          image: sumukhbhoopalam/backenddotnet:latest
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
+          ports:
+            - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backenddotnet
+  namespace: app-namespace
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: 5000
+  selector:
+    app: backenddotnet
