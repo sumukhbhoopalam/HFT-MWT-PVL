@@ -16,10 +16,19 @@ public class Startup
         services.AddSwaggerGen();
 
         // Add database context
-        // services.AddDbContext<ApplicationDbContext>(options =>
-        //     options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseInMemoryDatabase("ShoppingDb"));
+
+        // Add CORS configuration
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin() // Allow requests from any origin
+                       .AllowAnyMethod() // Allow any HTTP method
+                       .AllowAnyHeader(); // Allow any headers
+            });
+        });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -30,6 +39,9 @@ public class Startup
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ShoppingAPI v1"));
         }
+
+        // Enable CORS
+        app.UseCors("AllowAll");
 
         app.UseRouting();
         app.UseAuthorization();
