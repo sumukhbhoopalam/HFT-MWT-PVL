@@ -112,7 +112,7 @@ DATABASE_URL=postgresql://user:password@db:5432/mydatabase
    POST /api/shoppingItems
    Body: {
      "name": "item_name",
-     "price": 10.5
+     "amount": 10.5
    }
    ```
 
